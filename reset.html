@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sell It · Reset</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🛒%3C/text%3E%3C/svg%3E">
+<style>
+  :root { --brand: #ffc53d; --brand-2: #ffb000; --brand-soft: #fff3c4; --ink: #2b2100; --muted: #7d6a2e; --bg: #fffbeb; --line: #f8e3a1; --danger: #d9463b; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(circle at top right, #ffe98a 0, transparent 40%), var(--bg); color: var(--ink);
+  }
+  .card {
+    width: min(460px, calc(100% - 28px)); background: #fff; border-radius: 22px; padding: 26px;
+    border: 1px solid var(--line); box-shadow: 0 12px 30px rgba(140, 95, 0, .12);
+  }
+  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .logo {
+    width: 46px; height: 46px; border-radius: 15px; background: var(--ink);
+    display: flex; align-items: center; justify-content: center; font-size: 24px;
+  }
+  h1 { margin: 0; font-size: 22px; font-weight: 800; }
+  p { color: var(--muted); font-size: 14px; line-height: 1.5; }
+  label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin: 14px 0 6px; }
+  input {
+    width: 100%; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 14px;
+    font: inherit; font-size: 15px; background: #fffdf5; color: var(--ink); outline: none;
+  }
+  input:focus { border-color: var(--brand-2); box-shadow: 0 0 0 4px rgba(255, 176, 0, .2); }
+  button {
+    font: inherit; font-weight: 700; font-size: 15px; cursor: pointer; width: 100%; margin-top: 16px;
+    background: var(--danger); color: #fff; border: 0; padding: 13px 18px; border-radius: 999px;
+  }
+  button:hover { filter: brightness(1.08); }
+  .msg { min-height: 22px; margin-top: 14px; font-weight: 600; font-size: 14px; }
+  .msg.bad { color: var(--danger); }
+  .msg.good { color: #6b5a28; }
+  .links { margin-top: 18px; font-size: 14px; display: flex; gap: 14px; justify-content: center; }
+  .links a { color: var(--ink); font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">
+    <div class="logo">🛒</div>
+    <h1>Sell It · Reset</h1>
+  </div>
+  <p>This removes <b>every</b> seller account and shop from the cloud data. It cannot be undone.</p>
+
+  <label for="pw">Owner password · मालिक का पासवर्ड</label>
+  <input id="pw" type="password" autocomplete="off" onkeydown="if (event.key === 'Enter') reset()">
+
+  <button onclick="reset()">Remove all shops and accounts</button>
+  <div class="msg" id="msg"></div>
+
+  <div class="links">
+    <a href="/editor">Seller panel</a>
+    <a href="/client">Buyer panel</a>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+function show(text, ok) {
+  $('msg').textContent = text;
+  $('msg').className = 'msg ' + (ok ? 'good' : 'bad');
+}
+
+async function reset() {
+  const password = $('pw').value;
+  if (!password) { show('Enter the owner password.', false); return; }
+  if (!confirm('Remove every shop and account? This cannot be undone.')) return;
+
+  try {
+    const r = await fetch('/api/owner/reset', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password }),
+    });
+    const d = await r.json().catch(() => ({}));
+    if (r.ok) {
+      $('pw').value = '';
+      show(`Done. Removed ${d.removed} account(s). The buyer panel is now empty.`, true);
+    } else if (r.status === 401) {
+      show('Wrong owner password.', false);
+    } else {
+      show('Could not reset right now. Please try again in a moment.', false);
+    }
+  } catch (_) {
+    show('Could not reach Sell It. Please try again in a moment.', false);
+  }
+}
+</script>
+</body>
+</html>

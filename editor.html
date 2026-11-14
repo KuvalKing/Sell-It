@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sell It · Seller Panel</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🛒%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --brand: #ffc53d;
+    --brand-2: #ffb000;
+    --brand-soft: #fff3c4;
+    --ink: #2b2100;
+    --muted: #7d6a2e;
+    --bg: #fffbeb;
+    --card: #ffffff;
+    --line: #f8e3a1;
+    --danger: #d9463b;
+    --shadow: 0 12px 30px rgba(140, 95, 0, .10);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: system-ui, -apple-system, "Segoe UI", "Noto Sans Devanagari", "Nirmala UI", sans-serif;
+    background: radial-gradient(circle at top right, #ffe98a 0, transparent 40%), var(--bg);
+    color: var(--ink);
+  }
+  header {
+    background: linear-gradient(135deg, #ffd84d 0%, #ffb000 100%);
+    padding: 22px 18px 34px;
+    border-radius: 0 0 28px 28px;
+    box-shadow: 0 10px 26px rgba(255, 176, 0, .35);
+    display: flex; justify-content: space-between; align-items: center; gap: 10px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .logo {
+    width: 48px; height: 48px; border-radius: 16px; background: var(--ink);
+    display: flex; align-items: center; justify-content: center; font-size: 24px;
+  }
+  .brand h1 { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -.3px; }
+  .brand p { margin: 2px 0 0; font-size: 13px; color: #5a4300; }
+
+  main { max-width: 680px; margin: -16px auto 0; padding: 0 14px 40px; position: relative; }
+  .card {
+    background: var(--card); border-radius: 22px; padding: 18px; margin-bottom: 16px;
+    box-shadow: var(--shadow); border: 1px solid var(--line);
+  }
+  h2 { font-size: 17px; margin: 0 0 12px; font-weight: 800; }
+  label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin: 12px 0 6px; }
+  input[type=text], input[type=tel], input[type=password], input[type=number], input[type=time], select {
+    width: 100%; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 14px;
+    font: inherit; font-size: 15px; background: #fffdf5; color: var(--ink); outline: none;
+  }
+  input[type=time] { width: auto; }
+  input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--brand-2); }
+  input:focus, select:focus { border-color: var(--brand-2); box-shadow: 0 0 0 4px rgba(255, 176, 0, .2); }
+
+  button {
+    font: inherit; font-weight: 700; font-size: 14px; cursor: pointer;
+    background: var(--ink); color: #ffd84d; border: 0; padding: 12px 18px; border-radius: 999px;
+    transition: transform .1s, filter .15s;
+  }
+  button:hover { filter: brightness(1.12); }
+  button:active { transform: scale(.97); }
+  button.ghost { background: #fff; color: var(--ink); border: 1.5px solid var(--line); }
+  button.warn { background: var(--danger); color: #fff; }
+  button:disabled { opacity: .5; cursor: default; }
+
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .between { justify-content: space-between; }
+  .tabs {
+    background: var(--brand-soft); border-radius: 999px; padding: 4px;
+    display: inline-flex; gap: 4px; margin-bottom: 14px;
+  }
+  .tabs button { background: transparent; color: var(--muted); padding: 9px 14px; }
+  .tabs button.active { background: var(--ink); color: #ffd84d; }
+
+  .quick button {
+    background: var(--brand-soft); color: var(--ink); border: 1px solid var(--line);
+    font-size: 13px; font-weight: 600; padding: 8px 12px;
+  }
+  .item {
+    display: flex; gap: 12px; align-items: center; padding: 12px; margin-bottom: 10px;
+    border-radius: 18px; background: #fffdf5; border: 1px solid var(--line);
+  }
+  .thumb {
+    width: 62px; height: 62px; border-radius: 14px; object-fit: cover; flex-shrink: 0;
+    background: var(--brand-soft); display: flex; align-items: center; justify-content: center; font-size: 26px;
+  }
+  .item .info { flex: 1; min-width: 0; font-size: 14px; }
+  .item .info b { font-size: 15px; }
+  .btns { display: flex; gap: 6px; }
+  .btns button { padding: 7px 11px; font-size: 12px; }
+
+  .pill { display: inline-block; padding: 5px 12px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+  .pill.open { background: var(--ink); color: #ffd84d; }
+  .pill.closed { background: #ece3c6; color: #6b5a28; }
+  .muted { color: var(--muted); font-size: 13px; }
+  .error { color: var(--danger); font-size: 14px; font-weight: 600; min-height: 18px; margin-top: 8px; }
+  .note { background: #fff8d6; border-radius: 14px; padding: 12px 14px; font-size: 13px; color: var(--muted); margin-top: 14px; }
+  .pay-link { display: inline-block; background: var(--ink); color: #ffd84d; padding: 12px 18px; border-radius: 999px; font-weight: 700; text-decoration: none; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">🛒</div>
+    <div>
+      <h1>Sell It</h1>
+      <p>Seller panel · विक्रेता पैनल</p>
+    </div>
+  </div>
+  <button id="logoutBtn" class="ghost hidden" onclick="logout()">Logout</button>
+</header>
+
+<main>
+
+  <!-- Login / create account -->
+  <section id="authView" class="card">
+    <div class="tabs">
+      <button id="tabLogin" class="active" onclick="showTab('login')">Login · लॉगिन</button>
+      <button id="tabSignup" onclick="showTab('signup')">Create account · खाता बनाएँ</button>
+    </div>
+
+    <div id="loginForm">
+      <label>Phone (10 digits) · फ़ोन नंबर</label>
+      <input id="lPhone" type="tel" maxlength="10">
+      <label>Password · पासवर्ड</label>
+      <input id="lPass" type="password">
+      <div class="error" id="lErr"></div>
+      <button onclick="login()">Login · लॉगिन करें</button>
+    </div>
+
+    <div id="signupForm" class="hidden">
+      <label>Your name · आपका नाम</label>
+      <input id="sName" type="text">
+      <label>Phone (10 digits) · फ़ोन नंबर</label>
+      <input id="sPhone" type="tel" maxlength="10">
+      <label>Shop or seller name (English) · दुकान या विक्रेता का नाम</label>
+      <input id="sShopEn" type="text" placeholder="Ram Store">
+      <label>What do you sell? · आप क्या बेचते हैं?</label>
+      <select id="sCategory"></select>
+      <label>Password (4+ characters) · पासवर्ड</label>
+      <input id="sPass" type="password">
+      <div class="error" id="sErr"></div>
+      <button onclick="signup()">Create account · खाता बनाएँ</button>
+    </div>
+  </section>
+
+  <!-- Access fee -->
+  <section id="payView" class="card hidden">
+    <h2>Access fee · एक्सेस फ़ीस ₹10</h2>
+    <p class="muted">Sellers pay ₹10 to use Sell It. · Sell It इस्तेमाल करने के लिए ₹10 दें।</p>
+    <div class="row">
+      <a class="pay-link" href="https://razorpay.me/@shyam3617" target="_blank" rel="noopener">Pay ₹10 on Razorpay · Razorpay पर ₹10 दें</a>
+    </div>
+    <div class="row" style="margin-top:12px">
+      <button class="ghost" onclick="showUnlock()">I have paid · मैंने पैसे दे दिए</button>
+    </div>
+    <div class="note">Enter ₹10 on the Razorpay page. The password is given after the payment is checked.</div>
+
+    <div id="unlockBox" class="hidden" style="margin-top:16px;border-top:1px solid var(--line);padding-top:14px">
+      <h2>Sell It</h2>
+      <label>Password · पासवर्ड</label>
+      <input id="unlockPass" type="password" onkeydown="if (event.key === 'Enter') unlock()">
+      <div class="error" id="unlockErr"></div>
+      <button onclick="unlock()" style="margin-top:8px">Unlock · खोलें</button>
+    </div>
+  </section>
+
+  <!-- Seller dashboard -->
+  <div id="dashView" class="hidden">
+
+    <section class="card">
+      <div class="row between">
+        <div>
+          <h2 id="shopTitle" style="margin:0"></h2>
+          <div class="muted" id="ownerLine"></div>
+        </div>
+        <span id="statusBadge" class="pill open"></span>
+      </div>
+
+      <label>Shop or seller name (English) · दुकान या विक्रेता का नाम</label>
+      <input id="eShopEn" type="text">
+      <label>What do you sell? · आप क्या बेचते हैं?</label>
+      <select id="eCategory"></select>
+      <label>Closing time · बंद होने का समय</label>
+      <div class="row">
+        <input id="closingTime" type="time">
+        <button class="ghost" onclick="saveShop()">Save · सेव करें</button>
+      </div>
+      <div class="row" style="margin-top:14px">
+        <button id="toggleOpenBtn" onclick="toggleOpen()"></button>
+        <span id="statusText" class="muted"></span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Live location · लाइव लोकेशन</h2>
+      <div class="row">
+        <button id="locBtn" onclick="toggleLocation()"></button>
+        <span id="locStatus" class="muted">Not sharing</span>
+      </div>
+      <div class="note">Keep this page open while you sell. On a phone, GPS works only over https, which the cloud address provides.</div>
+      <div class="muted" id="locLink" style="margin-top:10px"></div>
+    </section>
+
+    <section class="card">
+      <h2>Your items · आपका सामान</h2>
+      <div class="row quick" id="quickPicks" style="margin-bottom:6px"></div>
+      <label>Item name (English) · नाम (English)</label>
+      <input id="iNameEn" type="text">
+      <label>Item name (Hindi, optional) · नाम (हिंदी, वैकल्पिक)</label>
+      <input id="iNameHi" type="text">
+      <div class="row">
+        <div style="flex:1;min-width:120px">
+          <label>Price (₹) · कीमत (₹)</label>
+          <input id="iPrice" type="number" min="1" step="1">
+        </div>
+        <div style="flex:1;min-width:120px">
+          <label>Unit · इकाई</label>
+          <select id="iUnit"></select>
+        </div>
+      </div>
+      <label>Description (optional) · विवरण (वैकल्पिक)</label>
+      <input id="iDesc" type="text" placeholder="Example: Dell i5, 8 GB RAM, 1 year old">
+      <label>Photo · फ़ोटो</label>
+      <input id="iPhoto" type="file" accept="image/*" onchange="previewPhoto()">
+      <img id="iPreview" class="hidden" style="max-width:120px;margin-top:10px;border-radius:14px" alt="">
+      <label style="display:flex;align-items:center;gap:8px">
+        <input id="iAvail" type="checkbox" checked> Available now · अभी उपलब्ध है
+      </label>
+      <div class="error" id="iErr"></div>
+      <button onclick="addItem()" style="margin-top:8px">Add item · सामान जोड़ें</button>
+    </section>
+
+    <section class="card">
+      <h2>My list · मेरी सूची</h2>
+      <div id="itemList"></div>
+    </section>
+
+  </div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+const CATS = {
+  vegetables: { label: 'Vegetables · सब्ज़ी', icon: '🥬', picks: [['Coriander', 'धनिया'], ['Mint', 'पुदीना'], ['Tomato', 'टमाटर'], ['Onion', 'प्याज़'], ['Potato', 'आलू'], ['Spinach', 'पालक'], ['Green chilli', 'हरी मिर्च'], ['Ginger', 'अदरक']] },
+  furniture: { label: 'Furniture · फ़र्नीचर', icon: '🛋️', picks: [['Sofa', 'सोफ़ा'], ['Bed', 'बेड'], ['Dining table', 'डाइनिंग टेबल'], ['Chair', 'कुर्सी'], ['Wardrobe', 'अलमारी'], ['Study table', 'स्टडी टेबल']] },
+  electronics: { label: 'Laptops & electronics · लैपटॉप व इलेक्ट्रॉनिक्स', icon: '💻', picks: [['Laptop', 'लैपटॉप'], ['Mobile phone', 'मोबाइल फ़ोन'], ['Tablet', 'टैबलेट'], ['Desktop PC', 'डेस्कटॉप पीसी'], ['Printer', 'प्रिंटर']] },
+  second_hand: { label: 'Second-hand devices · सेकंड-हैंड सामान', icon: '♻️', picks: [['Used mobile', 'पुराना मोबाइल'], ['Used laptop', 'पुराना लैपटॉप'], ['Used TV', 'पुराना टीवी'], ['Used fridge', 'पुराना फ्रिज'], ['Used washing machine', 'पुरानी वॉशिंग मशीन']] },
+  other: { label: 'Other · अन्य', icon: '🛒', picks: [] },
+};
+const UNIT_LABEL = { kg: 'per kg', litre: 'per litre', dozen: 'per dozen', piece: 'per piece', each: 'fixed price' };
+
+// Fill the dropdowns
+const catOptions = () => Object.entries(CATS).map(([k, c]) => `<option value="${k}">${c.label}</option>`).join('');
+$('sCategory').innerHTML = '<option value="">Choose · चुनें</option>' + catOptions();
+$('eCategory').innerHTML = catOptions();
+$('iUnit').innerHTML = Object.entries(UNIT_LABEL).map(([k, l]) => `<option value="${k}">${l}</option>`).join('');
+
+// Preview windows block browser storage, so every access is guarded
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (_) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (_) { /* not available here */ } },
+  del(k) { try { localStorage.removeItem(k); } catch (_) { /* not available here */ } },
+};
+let token = store.get('sellItToken');
+let me = null;            // logged-in seller, as sent by the server
+let photoData = '';       // photo selected for the next item
+let sharing = false, watchId = null, timer = null, lastPos = null;
+
+// The API is on the same server that served this page. Always open the page from the address
+// the server gives you, never by double-clicking the file.
+const APP_VERSION = '2026-11-13-7'; // must match VERSION in server.js
+// The same server that serves this page also answers the API.
+const API = '';
+
+// A hosted server can take a moment to wake up, so wait and try again before giving up
+const WAIT_BETWEEN_TRIES = [2000, 4000, 8000, 12000];
+const TAKING_TOO_LONG = 'Sell It is taking too long to answer. Please wait a minute and try again · कृपया एक मिनट बाद फिर कोशिश करें';
+const NOT_SELL_IT = 'This page is not connected to Sell It. Open the seller panel from your Sell It web address (the one ending in /editor), not from a file or preview · यह पेज Sell It से जुड़ा नहीं है';
+
+async function api(method, url, body) {
+  const options = {
+    method,
+    headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) },
+    body: body ? JSON.stringify(body) : undefined,
+  };
+  for (let attempt = 0; ; attempt++) {
+    let res = null;
+    try { res = await fetch(API + url, options); } catch (_) { res = null; }   // no connection at all
+    if (res) {
+      const data = await res.json().catch(() => null);
+      if (data) {
+        if (!res.ok) throw new Error(data.error || `Error ${res.status}`);
+        return data;
+      }
+      // It answered, but not with Sell It's data: waiting will not help
+      if (![502, 503, 504].includes(res.status)) throw new Error(NOT_SELL_IT);
+    }
+    // No connection, or the hosting service is still waking up: wait, then try again
+    if (attempt >= WAIT_BETWEEN_TRIES.length) throw new Error(TAKING_TOO_LONG);
+    await new Promise((resolve) => setTimeout(resolve, WAIT_BETWEEN_TRIES[attempt]));
+  }
+}
+
+async function mutate(method, url, body) {
+  try { me = await api(method, url, body); render(); }
+  catch (e) { alert(e.message); }
+}
+
+// ----- login / signup -----
+function showTab(t) {
+  const signup = t === 'signup';
+  $('signupForm').classList.toggle('hidden', !signup);
+  $('loginForm').classList.toggle('hidden', signup);
+  $('tabSignup').classList.toggle('active', signup);
+  $('tabLogin').classList.toggle('active', !signup);
+}
+
+async function signup() {
+  $('sErr').textContent = '';
+  if (!$('sCategory').value) { $('sErr').textContent = 'Choose what you sell · आप क्या बेचते हैं, चुनें'; return; }
+  try {
+    startSession(await api('POST', '/api/signup', {
+      name: $('sName').value, phone: $('sPhone').value,
+      shopEn: $('sShopEn').value, category: $('sCategory').value, password: $('sPass').value,
+    }));
+  } catch (e) { $('sErr').textContent = e.message; }
+}
+
+async function login() {
+  $('lErr').textContent = '';
+  try {
+    startSession(await api('POST', '/api/login', { phone: $('lPhone').value, password: $('lPass').value }));
+  } catch (e) { $('lErr').textContent = e.message; }
+}
+
+function startSession(d) {
+  token = d.token;
+  store.set('sellItToken', token);
+  me = d.vendor;
+  render(true);
+}
+
+function logout() {
+  stopLocation();
+  token = null;
+  store.del('sellItToken');
+  me = null;
+  render();
+}
+
+// ----- access fee: password unlock -----
+function showUnlock() {
+  $('unlockBox').classList.remove('hidden');
+  $('unlockPass').focus();
+}
+
+async function unlock() {
+  $('unlockErr').textContent = '';
+  try {
+    me = await api('POST', '/api/unlock', { password: $('unlockPass').value });
+    $('unlockPass').value = '';
+    render(true);
+  } catch (e) {
+    $('unlockErr').textContent = e.message;   // "Password incorrect" when the password is wrong
+  }
+}
+
+// ----- shop details -----
+function saveShop() {
+  mutate('PUT', '/api/shop', {
+    shopEn: $('eShopEn').value,
+    category: $('eCategory').value,
+    closingTime: $('closingTime').value,
+  });
+}
+
+// 12-hour time for display, e.g. 20:00 -> 8:00 PM
+const fmt12 = t => {
+  const [h, m] = t.split(':').map(Number);
+  return `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`;
+};
+
+// The shop is open only when it is switched on AND the time is before the closing time.
+function toggleOpen() {
+  if (me.open) {                           // open now: close it
+    mutate('PUT', '/api/shop', { isOpen: false });
+  } else if (!me.isOpen) {                 // switched off by you: switch it on
+    mutate('PUT', '/api/shop', { isOpen: true });
+  } else {                                 // closed only because the closing time has passed
+    alert(`The closing time (${fmt12(me.closingTime)}) has passed. Set a later closing time, press Save, and the shop opens again.`);
+  }
+}
+
+// ----- items -----
+function quick(en, hi) {
+  $('iNameEn').value = en;
+  $('iNameHi').value = hi;
+}
+
+function renderQuick() {
+  const picks = CATS[me.category].picks;
+  $('quickPicks').innerHTML = picks.length
+    ? picks.map(([en, hi]) => `<button onclick="quick('${en}', '${hi}')">${en} · ${hi}</button>`).join('')
+    : '<span class="muted">Type your item name below · नाम नीचे लिखें</span>';
+}
+
+function previewPhoto() {
+  const file = $('iPhoto').files[0];
+  if (!file) return;
+  const url = URL.createObjectURL(file);
+  const img = new Image();
+  img.onload = () => {
+    // Only resized to keep uploads small. The photo itself is not edited.
+    const scale = Math.min(1, 1200 / Math.max(img.width, img.height));
+    const c = document.createElement('canvas');
+    c.width = Math.round(img.width * scale);
+    c.height = Math.round(img.height * scale);
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, c.width, c.height);
+    ctx.drawImage(img, 0, 0, c.width, c.height);
+    photoData = c.toDataURL('image/jpeg', 0.9);
+    $('iPreview').src = photoData;
+    $('iPreview').classList.remove('hidden');
+    URL.revokeObjectURL(url);
+  };
+  img.src = url;
+}
+
+async function addItem() {
+  $('iErr').textContent = '';
+  const body = {
+    nameEn: $('iNameEn').value,
+    nameHi: $('iNameHi').value,
+    price: $('iPrice').value,
+    unit: $('iUnit').value,
+    description: $('iDesc').value,
+    available: $('iAvail').checked,
+    photo: photoData,
+  };
+  if (!body.nameEn.trim() || !(Number(body.price) > 0)) {
+    $('iErr').textContent = 'Item name और price भरें · Enter an item name and a price above 0';
+    return;
+  }
+  try {
+    me = await api('POST', '/api/items', body);
+    ['iNameEn', 'iNameHi', 'iPrice', 'iDesc'].forEach(id => { $(id).value = ''; });
+    $('iPhoto').value = '';
+    photoData = '';
+    $('iPreview').classList.add('hidden');
+    render();
+  } catch (e) { $('iErr').textContent = e.message; }
+}
+
+const findItem = id => me.items.find(i => i.id === id);
+
+function toggleItem(id) {
+  mutate('PUT', `/api/items/${id}`, { available: !findItem(id).available });
+}
+
+function editPrice(id) {
+  const it = findItem(id);
+  const p = prompt(`New price for ${it.nameEn} (₹) · नई कीमत`, it.price);
+  if (p && Number(p) > 0) mutate('PUT', `/api/items/${id}`, { price: Number(p) });
+}
+
+function removeItem(id) {
+  if (confirm('Remove this item? · हटाएँ?')) mutate('DELETE', `/api/items/${id}`);
+}
+
+function renderItems() {
+  const items = me.items || [];
+  const icon = CATS[me.category].icon;
+  $('itemList').innerHTML = items.length ? items.map(i => `
+    <div class="item">
+      ${i.photo ? `<img class="thumb" src="${esc(i.photo)}" alt="">` : `<div class="thumb">${icon}</div>`}
+      <div class="info">
+        <b>${esc(i.nameEn)}</b> ${i.nameHi ? `<span class="muted">(${esc(i.nameHi)})</span>` : ''}<br>
+        ₹${esc(i.price)} <span class="muted">${esc(UNIT_LABEL[i.unit] || '')}</span>
+        <span class="muted">${i.available ? '· Available' : '· Hidden'}</span>
+        ${i.description ? `<br><span class="muted">${esc(i.description)}</span>` : ''}
+      </div>
+      <div class="btns">
+        <button class="ghost" onclick="toggleItem('${i.id}')">${i.available ? 'Hide' : 'Show'}</button>
+        <button class="ghost" onclick="editPrice('${i.id}')">Price</button>
+        <button class="warn" onclick="removeItem('${i.id}')">✕</button>
+      </div>
+    </div>`).join('') : '<p class="muted">No items yet · अभी कोई सामान नहीं</p>';
+}
+
+// ----- live location (GPS from this phone or laptop) -----
+function toggleLocation() {
+  if (sharing) stopLocation();
+  else startLocation();
+}
+
+function startLocation() {
+  if (!navigator.geolocation) return alert('GPS is not available on this device.');
+  sharing = true;
+  updateLocUI();
+  $('locStatus').textContent = 'Getting GPS fix… · GPS ढूँढ रहे हैं';
+  watchId = navigator.geolocation.watchPosition(
+    pos => { lastPos = { lat: pos.coords.latitude, lng: pos.coords.longitude }; },
+    err => { $('locStatus').textContent = 'GPS error: ' + err.message; },
+    { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 });
+  // Send the latest position every 5 seconds, so the shop stays "live" even when standing still
+  timer = setInterval(sendLocation, 5000);
+}
+
+function sendLocation() {
+  if (!sharing || !lastPos) return;
+  api('POST', '/api/location', lastPos)
+    .then(() => { $('locStatus').textContent = 'Sharing live · ' + new Date().toLocaleTimeString(); })
+    .catch(e => { $('locStatus').textContent = e.message; });
+}
+
+function stopLocation() {
+  if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+  clearInterval(timer);
+  watchId = null; timer = null; lastPos = null;
+  if (sharing) api('POST', '/api/location', { stop: true }).catch(() => {});
+  sharing = false;
+  updateLocUI();
+}
+
+function updateLocUI() {
+  $('locBtn').textContent = sharing ? 'Stop sharing · शेयरिंग बंद करें' : 'Start sharing · लोकेशन शेयर करें';
+  $('locBtn').className = sharing ? 'warn' : '';
+  if (!sharing) $('locStatus').textContent = 'Not sharing · शेयर नहीं हो रही';
+}
+
+// ----- screens -----
+function render(fill = false) {
+  const logged = !!me;
+  $('authView').classList.toggle('hidden', logged);
+  $('logoutBtn').classList.toggle('hidden', !logged);
+  $('payView').classList.toggle('hidden', !logged || me.accessPaid);
+  $('dashView').classList.toggle('hidden', !logged || !me.accessPaid);
+  if (!logged || !me.accessPaid) return;
+
+  if (fill) {
+    $('eShopEn').value = me.shopEn;
+    $('eCategory').value = me.category;
+    $('closingTime').value = me.closingTime;
+    $('iUnit').value = me.category === 'vegetables' ? 'kg' : 'each';
+  }
+  const cat = CATS[me.category];
+  $('shopTitle').textContent = me.shopEn;
+  $('ownerLine').textContent = `${cat.icon} ${cat.label} · ${me.name} · ${me.phone}`;
+  $('statusBadge').textContent = me.open ? 'Open · खुली' : 'Closed · बंद';
+  $('statusBadge').className = `pill ${me.open ? 'open' : 'closed'}`;
+  $('statusText').textContent = me.open
+    ? `Open until ${fmt12(me.closingTime)}`
+    : (!me.isOpen ? 'Closed by you' : `Closed: closing time ${fmt12(me.closingTime)} has passed`);
+  $('toggleOpenBtn').textContent = me.open ? 'Close shop now · दुकान अभी बंद करें' : 'Open shop · दुकान खोलें';
+  $('locLink').innerHTML = me.location
+    ? `Last sent: ${me.location.lat.toFixed(5)}, ${me.location.lng.toFixed(5)} · ` +
+      `<a target="_blank" rel="noopener" href="https://www.google.com/maps?q=${me.location.lat},${me.location.lng}" style="color:#9a6700;font-weight:700">View on Google Maps</a>`
+    : '';
+  updateLocUI();
+  renderQuick();
+  renderItems();
+}
+
+async function init() {
+  if (token) {
+    try { me = await api('GET', '/api/me'); }
+    catch (_) { token = null; store.del('sellItToken'); }
+  }
+  render(true);
+}
+// Refresh the dashboard by itself, so the status changes when the closing time passes
+setInterval(async () => {
+  if (!token || !me || !me.accessPaid) return;
+  try { me = await api('GET', '/api/me'); render(); } catch (_) { /* try again next time */ }
+}, 15000);
+
+init();
+</script>
+</body>
+</html>

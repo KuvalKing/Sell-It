@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sell It · Nearby Sellers</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🛒%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --brand: #ffc53d;
+    --brand-2: #ffb000;
+    --brand-soft: #fff3c4;
+    --ink: #2b2100;
+    --muted: #7d6a2e;
+    --bg: #fffbeb;
+    --card: #ffffff;
+    --line: #f8e3a1;
+    --shadow: 0 12px 30px rgba(140, 95, 0, .10);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: radial-gradient(circle at top right, #ffe98a 0, transparent 40%), var(--bg);
+    color: var(--ink);
+  }
+  header {
+    background: linear-gradient(135deg, #ffd84d 0%, #ffb000 100%);
+    padding: 26px 18px 40px;
+    border-radius: 0 0 30px 30px;
+    box-shadow: 0 10px 26px rgba(255, 176, 0, .35);
+  }
+  .brand { display: flex; align-items: center; gap: 14px; max-width: 720px; margin: 0 auto; }
+  .logo {
+    width: 54px; height: 54px; border-radius: 18px; background: var(--ink);
+    display: flex; align-items: center; justify-content: center; font-size: 28px;
+  }
+  .brand h1 { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -.4px; }
+  .brand p { margin: 3px 0 0; font-size: 14px; color: #5a4300; }
+
+  main { max-width: 720px; margin: -22px auto 0; padding: 0 14px 44px; position: relative; }
+
+  .search {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--card); border: 1.5px solid var(--line); border-radius: 999px;
+    padding: 4px 18px; box-shadow: var(--shadow); margin-bottom: 14px;
+  }
+  .search span { font-size: 18px; }
+  .search input {
+    flex: 1; border: 0; outline: none; background: transparent;
+    font: inherit; font-size: 16px; padding: 12px 0; color: var(--ink);
+  }
+
+  .chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 14px; scrollbar-width: none; }
+  .chips::-webkit-scrollbar { display: none; }
+  .chip {
+    flex-shrink: 0; background: var(--card); color: var(--ink);
+    border: 1.5px solid var(--line); border-radius: 999px; padding: 9px 14px;
+    font: inherit; font-size: 14px; font-weight: 600; cursor: pointer;
+  }
+  .chip.on { background: var(--ink); color: #ffd84d; border-color: var(--ink); }
+
+  .toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 10px; }
+  .count { font-size: 14px; font-weight: 700; color: var(--muted); }
+  .switch { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  .switch input { width: 18px; height: 18px; accent-color: var(--brand-2); }
+
+  #mapBox {
+    background: var(--card); border-radius: 22px; overflow: hidden; margin-bottom: 16px;
+    box-shadow: var(--shadow); border: 1px solid var(--line);
+  }
+  #mapBox .bar { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 14px; font-weight: 800; }
+  #map { width: 100%; height: 240px; border: 0; display: block; }
+
+  .shop {
+    background: var(--card); border-radius: 22px; padding: 18px; margin-bottom: 16px;
+    box-shadow: var(--shadow); border: 1px solid var(--line);
+    transition: transform .15s, box-shadow .15s;
+  }
+  .shop:hover { transform: translateY(-2px); box-shadow: 0 16px 36px rgba(140, 95, 0, .14); }
+  .shop.focus { outline: 3px solid var(--brand-2); outline-offset: 2px; }
+  .shop-top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+  .shop h3 { margin: 0; font-size: 19px; font-weight: 800; letter-spacing: -.2px; }
+  .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .pills { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+
+  .pill { display: inline-flex; align-items: center; padding: 5px 11px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .pill.open { background: var(--ink); color: #ffd84d; }
+  .pill.closed { background: #ece3c6; color: #6b5a28; }
+  .pill.live { background: #e7f0ff; color: #1f5fbf; }
+  .pill.live::before {
+    content: ""; width: 8px; height: 8px; border-radius: 50%; background: #2f80ed; margin-right: 6px;
+    animation: pulse 1.6s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(47, 128, 237, .55); }
+    70% { box-shadow: 0 0 0 8px rgba(47, 128, 237, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(47, 128, 237, 0); }
+  }
+
+  .items { margin-top: 12px; }
+  .it {
+    display: flex; gap: 12px; align-items: center; padding: 10px 12px; margin-bottom: 8px;
+    border-radius: 16px; background: #fffdf5; border: 1px solid var(--line);
+  }
+  .it img, .ph {
+    width: 56px; height: 56px; border-radius: 14px; object-fit: cover; flex-shrink: 0;
+    background: var(--brand-soft); display: flex; align-items: center; justify-content: center; font-size: 24px;
+  }
+  .it .n { flex: 1; min-width: 0; }
+  .it .n b { font-size: 15px; }
+  .price {
+    background: var(--brand); color: var(--ink); border-radius: 14px; padding: 6px 12px;
+    font-weight: 800; font-size: 16px; text-align: center; white-space: nowrap;
+  }
+  .price small { display: block; font-size: 11px; font-weight: 600; opacity: .8; }
+
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--ink); color: #ffd84d; padding: 11px 16px; border-radius: 999px;
+    border: 1.5px solid var(--ink); font: inherit; font-size: 14px; font-weight: 700;
+    text-decoration: none; cursor: pointer; transition: transform .1s, filter .15s;
+  }
+  .btn:hover { filter: brightness(1.12); }
+  .btn:active { transform: scale(.97); }
+  .btn.ghost { background: #fff; color: var(--ink); border-color: var(--line); }
+
+  .empty { text-align: center; color: var(--muted); padding: 50px 10px; font-size: 15px; }
+  .empty span { display: block; font-size: 40px; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">🛒</div>
+    <div>
+      <h1>Sell It</h1>
+      <p>Nearby sellers, live prices and live locations</p>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="search">
+    <span>🔍</span>
+    <input type="search" id="q" placeholder="Search coriander, sofa, laptop…" oninput="render()">
+  </div>
+
+  <div class="chips" id="catChips"></div>
+
+  <div class="toolbar">
+    <span class="count" id="count"></span>
+    <label class="switch"><input type="checkbox" id="liveOnly" onchange="render()"> Live only</label>
+  </div>
+
+  <div id="mapBox" hidden>
+    <div class="bar">
+      <span id="mapTitle">Live location</span>
+      <button class="btn ghost" onclick="closeMap()">Close</button>
+    </div>
+    <iframe id="map" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+  </div>
+
+  <div id="list"></div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const fmtTime = t => {
+  const [h, m] = t.split(':').map(Number);
+  return `${((h + 11) % 12) + 1}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`;
+};
+
+const CATS = {
+  vegetables: { label: 'Vegetables', icon: '🥬' },
+  furniture: { label: 'Furniture', icon: '🛋️' },
+  electronics: { label: 'Laptops & electronics', icon: '💻' },
+  second_hand: { label: 'Second-hand devices', icon: '♻️' },
+  other: { label: 'Other', icon: '🛒' },
+};
+const UNIT_LABEL = { kg: 'per kg', litre: 'per litre', dozen: 'per dozen', piece: 'per piece', each: 'fixed price' };
+
+// Served by the Sell It server, so the API is on the same address.
+// The same server that serves this page also answers the API.
+const API = '';
+
+let shops = [];
+let focusId = null;
+let mapKey = '';
+let activeCat = '';
+
+// Get the latest sellers from the server
+async function load() {
+  try { shops = await (await fetch(API + '/api/shops')).json(); }
+  catch (_) {
+    $('list').innerHTML = '<div class="empty"><span>🔌</span>Cannot reach Sell It right now. Please try again in a moment.</div>';
+    return;
+  }
+  if (focusId) updateMap();
+  render();
+}
+
+function renderChips() {
+  const all = [['', '🏪', 'All']].concat(Object.entries(CATS).map(([k, c]) => [k, c.icon, c.label]));
+  $('catChips').innerHTML = all.map(([k, icon, label]) =>
+    `<button class="chip${activeCat === k ? ' on' : ''}" onclick="setCat('${k}')">${icon} ${label}</button>`).join('');
+}
+
+function setCat(k) {
+  activeCat = k;
+  renderChips();
+  render();
+}
+
+function render() {
+  const q = $('q').value.trim().toLowerCase();
+  const liveOnly = $('liveOnly').checked;
+  const visible = shops
+    .filter(s => (!activeCat || s.category === activeCat) && (!liveOnly || s.live))
+    .map(s => ({
+      ...s,
+      shown: q
+        ? s.items.filter(i => `${i.nameEn} ${i.description}`.toLowerCase().includes(q))
+        : s.items,
+    }))
+    .filter(s => !q || s.shown.length)
+    .sort((a, b) => (b.open - a.open) || (b.live - a.live));
+
+  $('count').textContent = `${visible.length} ${visible.length === 1 ? 'seller' : 'sellers'}`;
+  $('list').innerHTML = visible.length
+    ? visible.map(card).join('')
+    : '<div class="empty"><span>🔎</span>No sellers found. Try another search or category.</div>';
+}
+
+function card(s) {
+  const c = CATS[s.category] || CATS.other;
+  const hasLoc = !!s.location;
+  return `
+    <article class="shop${s.id === focusId ? ' focus' : ''}">
+      <div class="shop-top">
+        <div>
+          <h3>${c.icon} ${esc(s.shopEn)}</h3>
+          <div class="sub">${esc(c.label)} · ${s.open ? `Open till ${fmtTime(s.closingTime)}` : 'Closed now'}</div>
+        </div>
+        <div class="pills">
+          <span class="pill ${s.open ? 'open' : 'closed'}">${s.open ? 'Open' : 'Closed'}</span>
+          ${s.live ? '<span class="pill live">Live</span>' : ''}
+        </div>
+      </div>
+
+      <div class="items">
+        ${s.shown.length
+          ? s.shown.map(i => itemRow(i, c.icon)).join('')
+          : '<div class="sub">No items listed yet</div>'}
+      </div>
+
+      <div class="actions">
+        ${hasLoc
+          ? `<button class="btn ghost" onclick="focusShop('${s.id}')">Show on map</button>
+             <a class="btn" target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&destination=${s.location.lat},${s.location.lng}">Directions</a>`
+          : '<span class="sub">Location not shared</span>'}
+      </div>
+    </article>`;
+}
+
+function itemRow(i, icon) {
+  return `
+    <div class="it">
+      ${i.photo ? `<img src="${esc(i.photo)}" alt="${esc(i.nameEn)}">` : `<div class="ph">${icon}</div>`}
+      <div class="n">
+        <b>${esc(i.nameEn)}</b>
+        ${i.description ? `<div class="sub">${esc(i.description)}</div>` : ''}
+      </div>
+      <div class="price">₹${esc(i.price)}<small>${esc(UNIT_LABEL[i.unit] || '')}</small></div>
+    </div>`;
+}
+
+// ----- map -----
+function focusShop(id) {
+  focusId = id;
+  updateMap();
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function updateMap() {
+  const s = shops.find(x => x.id === focusId);
+  if (!s || !s.location) { closeMap(); return; }
+  const key = `${s.location.lat},${s.location.lng}`;
+  if (key !== mapKey) {
+    mapKey = key;
+    $('map').src = `https://maps.google.com/maps?q=${key}&z=16&output=embed`;
+  }
+  $('mapTitle').textContent = `Live location · ${s.shopEn}`;
+  $('mapBox').hidden = false;
+}
+
+function closeMap() {
+  focusId = null;
+  mapKey = '';
+  $('map').src = '';
+  $('mapBox').hidden = true;
+  render();
+}
+
+// ----- real-time updates from the server -----
+renderChips();
+new EventSource(API + '/api/stream').onmessage = load;
+setInterval(load, 15000);   // safety refresh in case the live connection drops
+load();
+</script>
+</body>
+</html>
